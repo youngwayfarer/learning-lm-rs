@@ -3,7 +3,7 @@ use std::vec;
 
 use crate::config::LlamaConfigJson;
 use crate::kvcache::KVCache;
-use crate::operators as OP;
+use crate::operators::{self as OP, matmul_transb, rms_norm, swiglu};
 use crate::params::LLamaParams;
 use crate::tensor::Tensor;
 use safetensors::SafeTensors;
@@ -101,10 +101,11 @@ impl Llama<f32> {
             let full_k = &mut cache.k_cache(layer, 0); // (total_seq, n_kv_h * dqkv)
             let full_v = &mut cache.v_cache(layer, 0); // (total_seq, n_kv_h * dqkv)
 
-            todo!("self_attention(...)");
-            todo!("down_proj matmul and add residual");
+            // TODO:!("self_attention(...)");
+            
+            // TODO:!("down_proj matmul and add residual");
 
-            todo!("mlp(...)");
+            // TODO:!("mlp(...)");
         }
 
         // No matter what seq_len, the output is always a 1D vector of length vocab,
@@ -135,7 +136,7 @@ impl Llama<f32> {
     ) -> Vec<u32>{
         let mut result = Vec::<u32>::new();
         
-        todo!("实现文本生成");
+        // TODO:!("实现文本生成");
         
         result
     }
@@ -153,7 +154,7 @@ fn self_attention(
     total_seq_len: usize,
     dqkv: usize,
 ) {
-    todo!("Implement self_attention");
+    // TODO:!("Implement self_attention");
 }
 
 fn mlp(
@@ -167,7 +168,12 @@ fn mlp(
     rms_w: &Tensor<f32>,
     eps: f32,
 ) {
-    todo!("Implement mlp");
+    // TODO:!("Implement mlp");
+    rms_norm(hidden_states, &residual, rms_w, eps);
+    matmul_transb(gate, 0.0, hidden_states, w_gate, 1.0);
+    matmul_transb(up, 0.0, hidden_states, w_up, 1.0);
+    swiglu(up, gate);
+    matmul_transb(residual, 1.0, up, w_down, 1.0);
 }
 
 #[test]
